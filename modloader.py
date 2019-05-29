@@ -275,3 +275,6 @@ while True:
         break
     else:
         print("\n#########\nERROR: No valid input provided")
+
+print("\nPress any key to exit script...")
+input("")
