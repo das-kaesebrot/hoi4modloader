@@ -11,20 +11,17 @@ import configparser
 ### PROGRAM VARIABLES FOR CUSTOMIZATION ###################################################
 
 # enable this to override checking for path
-# overrideDefaultPath = False
+overrideDefaultPath = False
 # Paste your custom path here if above option is enabled
-# userDefinedPath1 = "D:\Kaesebrot\Documents\Paradox Interactive\Hearts of Iron IV"
-# NOT RECOMMENDED - set this to False to turn off automatic backups when making changes to settings.txt file
-# doBackup = True
+userDefinedPath1 = "D:\Kaesebrot\Documents\Paradox Interactive\Hearts of Iron IV"
+# set this to False to turn off automatic backups when making changes to settings.txt file
+doBackup = True
+# set this to True to use a config file to set the above 3 options
+useconfigFile = False
 
 ##########################################################################################
 
 config = configparser.ConfigParser()
-userDefinedPath1 = ""
-doBackup = True
-overrideDefaultPath = False
-
-useconfigFile = False
 
 if useconfigFile:
     print("")
