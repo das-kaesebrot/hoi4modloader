@@ -67,7 +67,6 @@ def ReadFileStatus():
         labeltext = "File read successfully"
     else:
         labeltext = "Error reading file"
-
     return;
 """
 
