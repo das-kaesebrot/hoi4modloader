@@ -1,7 +1,7 @@
 from pathlib import Path
 import os
 import time
-import re
+# import re
 import string
 import platform
 import tkinter
@@ -13,7 +13,7 @@ import configparser
 # enable this to override checking for path
 overrideDefaultPath = False
 # Paste your custom path here if above option is enabled
-userDefinedPath1 = "D:\Kaesebrot\Documents\Paradox Interactive\Hearts of Iron IV"
+userDefinedPath1 = ""
 # set this to False to turn off automatic backups when making changes to settings.txt file
 doBackup = True
 # set this to True to use a config file to set the above 3 options
@@ -21,32 +21,33 @@ useconfigFile = False
 
 ##########################################################################################
 
-config = configparser.ConfigParser()
-
-if useconfigFile:
-    print("")
-    #generates config file if it doesn't exist
-    if not os.path.isfile(Path(os.curdir) / 'config.cfg'):
-        print("Generating config file...")
-        config['Switches'] = {'overrideDefaultPath': 'no',
-                            'doSettingsBackup': 'yes'}
-        config['Paths'] = {'userDefinedPath': ''}
-        with open('config.ini', 'w') as configfile:
-            config.write(configfile)
-    else:
-        print("Reading config file...")
-        config.read('config.cfg')
-        overrideDefaultPath = config['Switches'].getboolean('overrideDefaultPath')
-        doBackup = config['Switches'].getboolean('doSettingsBackup')
-        userDefinedPath1 = config['Paths'].get('userDefinedPath')
-
-
-currentOS = platform.system()
-
 print("\n\tScript written by")
 print("\tKaesebrot - @das_kaesebrot\n")
 print("### ATTENTION ###")
 print("Do not run this script while Hearts of Iron IV or the Hearts of Iron IV launcher are running!\n")
+
+config = configparser.ConfigParser()
+
+if useconfigFile:
+    # Generates a config file next to the script
+    configname = "config.ini"
+    if not os.path.isfile(Path(os.curdir) / configname):
+        print("Generating config file...\n")
+        config['Switches'] = {'overrideDefaultPath': 'no',
+                            'doSettingsBackup': 'yes'}
+        config['Paths'] = {'userDefinedPath': ''}
+        with open(configname, 'w') as configfile:
+            config.write(configfile)
+    
+    # Reads config file values
+    else:
+        print("Reading config file...\n")
+        config.read(configname)
+        overrideDefaultPath = config['Switches'].getboolean('overrideDefaultPath')
+        doBackup = config['Switches'].getboolean('doSettingsBackup')
+        userDefinedPath1 = config['Paths'].get('userDefinedPath')
+
+currentOS = platform.system()
 
 def setdefaultPath(currentOS):
     path = ""
@@ -65,9 +66,6 @@ def setdefaultPath(currentOS):
     
     path2 = Path(path)
     return path2
-    # return path;
-
-# replace this 
 
 if overrideDefaultPath:
     defaultpath = userDefinedPath1
@@ -83,16 +81,6 @@ if not doBackup:
 filename = "settings.txt"
 filepath1 = Path(defaultpath) / filename
 
-"""
-def ReadFileStatus():
-    status = ReadFile(filepath1)
-    if status:
-        labeltext = "File read successfully"
-    else:
-        labeltext = "Error reading file"
-    return;
-"""
-
 ModsDetected = False
 
 def ReadFile1(filepath):
@@ -105,15 +93,11 @@ def ReadFile1(filepath):
 
     readlines = False
     stopReadingNext = False
-
     counter = 0
-
     f = open(filepath, 'r')
+    copyModId = []
 
     print("Reading settings.txt")
-
-    # modids = []
-    copyModId = []
 
     for line in f:
         
@@ -125,6 +109,8 @@ def ReadFile1(filepath):
             copyModId.append(line)
         if stopReadingNext:
             readlines = False
+        
+        # Keeping this for later for optional Steam API support        
         """
         if ".mod" in line and readlines:
             temp = line
@@ -152,8 +138,8 @@ useDefaultPath = True
 
 def yesno():
     while True:
-        print("[y/n]")
-        choice1 = input()
+        # print("[y/n]")
+        choice1 = input("[y/n] ")
         choice1 = choice1.lower()
         if choice1 == 'y':
             return True
@@ -168,9 +154,6 @@ if not overrideDefaultPath:
     useDefaultPath = yesno()
 
 if not useDefaultPath:
-    # print("Please enter user defined read path (not including file name)")
-    # userDefinedPath = input()
-    # userDefinedPath = Path(userDefinedPath)
     print("Opening file dialog...")
     root = tkinter.Tk()
     root.withdraw()
@@ -181,8 +164,6 @@ HOI4ModList = ReadFile1(filepath1)
 
 def exportModList(List1):
     filenameExport = "modlist_" + time.strftime("%Y%m%d-%H%M%S") + ".txt"
-    # print("\nExported file will be called " + str(filenameExport))
-    # print("Exported file will be written to " + str(defaultpath))
     f = open(Path(defaultpath) / filenameExport, "x")
     for item in HOI4ModList:
         f.write(item)
@@ -195,10 +176,8 @@ def importModList():
     filepathImport = Path(getFilePath())
 
     counter = 0
-
-    f = open(filepathImport, 'r')
-
     importedModList = []
+    f = open(filepathImport, 'r')
 
     for line in f:
         if ".mod" in line:
@@ -301,7 +280,7 @@ def getFilePath():
 print("")
 while True:
     print("Please choose an option:\n[1] Import mod list to HOI4 from file ($CustomFile.txt -> settings.txt)\n[2] Export mod list from HOI4 to file (settings.txt -> $CustomFile.txt)\n[3] Abort script")
-    choice2 = input()
+    choice2 = input("> ")
     if choice2 == "1":
         importModList()
         break
@@ -313,5 +292,4 @@ while True:
     else:
         print("\n#########\nERROR: No valid input provided")
 
-print("\nPress any key to exit script...")
-input("")
+input("\nPress any key to exit script... ")
