@@ -7,13 +7,21 @@ import platform
 import tkinter
 from tkinter import filedialog
 
-currentOS = platform.system()
+### PROGRAM VARIABLES FOR CUSTOMIZATION ###################################################
 
 # enable this to override checking for path
 overrideDefaultPath = True
 # Paste your custom path here if above option is enabled
 userDefinedPath1 = "D:\Kaesebrot\Documents\Paradox Interactive\Hearts of Iron IV"
+# NOT RECOMMENDED - set this to False to turn off automatic backups when making changes to settings.txt file
+doBackup = True
 
+##########################################################################################
+
+currentOS = platform.system()
+
+print("\n\tScript written by")
+print("\tKaesebrot - @das_kaesebrot\n")
 print("### ATTENTION ###")
 print("Do not run this script while Hearts of Iron IV or the Hearts of Iron IV launcher are running!\n")
 
@@ -33,7 +41,7 @@ def setdefaultPath(currentOS):
     print("Default path was automatically set to: " + path + "\n")
     
     path2 = Path(path)
-    return path2;
+    return path2
     # return path;
 
 # replace this 
@@ -45,6 +53,9 @@ if overrideDefaultPath:
 else:
     print("Default path override: DEACTIVATED")
     defaultpath = setdefaultPath(currentOS)
+
+if not doBackup:
+    print("\nAutomatic backup: DEACTIVATED")
 
 filename = "settings.txt"
 filepath1 = Path(defaultpath) / filename
@@ -161,42 +172,111 @@ def importModList():
 
     f = open(filepathImport, 'r')
 
-    readlines = False
-    stopReadingNext = False
-
-    ImportedModList = []
+    importedModList = []
 
     for line in f:
-        if "last_mods" in line:
-            readlines = True
-        elif "}" in line and readlines:
-            stopReadingNext = True
-        if readlines:
-            ImportedModList.append(line)
-        if stopReadingNext:
-            readlines = False
-        """
-        if ".mod" in line and readlines:
-            temp = line
-            temp = re.sub("\D", "", temp)
-            modids.append(int(temp))
-            counter += 1
-        """
-        if ".mod" in line and readlines:
+        if ".mod" in line:
+            importedModList.append(line)
             counter += 1
     
     print("Found " + str(counter) + " mods in file")
 
-    filenameBackup = time.strftime("settings_backup_" + "%Y%m%d-%H%M%S") + ".txt"
+    if doBackup:
+        filenameBackup = time.strftime("settings_backup_" + "%Y%m%d-%H%M%S") + ".txt"
+
+        f2 = open(filepath1, 'r')
+        f3 = open(Path(defaultpath) / filenameBackup, 'x')
+        for line in f2:
+            f3.write(line)
+        f2.close()
+        f3.close()
+        print("Wrote backup of settings.txt to " + str(Path(defaultpath) / filenameBackup))
+    else:
+        print("Skipping backup of settings.txt")
+    
+    """
+    tempFilename = "temp-settings.txt"
 
     f2 = open(filepath1, 'r')
-    f3 = open(Path(defaultpath) / filenameBackup, 'x')
+    f3 = open(Path(defaultpath) / tempFilename, 'x')
     for line in f2:
         f3.write(line)
     f2.close()
     f3.close()
-    print("Wrote backup of settings.txt to " + str(Path(defaultpath) / filenameBackup))
+    """
+    
+    tempFilename1 = "settings.txt.part1.TEMP"
+    tempFilename2 = "settings.txt.part2.TEMP"
 
+    # readlines = False
+    # stopReadingNext = False
+    # startReadingNext = False
+    skipLines = False
+    part1Done = False
+
+    f_settings_old = open(filepath1, 'r')
+    f_settings_temp1 = open(Path(defaultpath) / tempFilename1, 'x')
+    f_settings_temp2 = open(Path(defaultpath) / tempFilename2, 'x')
+    for line in f_settings_old:
+        if not skipLines and not part1Done:
+            f_settings_temp1.write(line)
+        if "last_mods" in line:
+            skipLines = True
+        elif "}" in line and skipLines:
+            part1Done = True
+        if part1Done:
+            f_settings_temp2.write(line)
+
+    f_settings_old.close()
+    f_settings_temp1.close()
+    f_settings_temp2.close()
+
+    f_settings_temp1 = open(Path(defaultpath) / tempFilename1, 'r')
+    f_settings_temp2 = open(Path(defaultpath) / tempFilename2, 'r')
+    
+    os.remove(filepath1)
+
+    f_settings_new = open(filepath1, "x")
+    for line in f_settings_temp1:
+        f_settings_new.write(line)
+    
+    f_settings_temp1.close()
+
+    """
+    for line in f:
+        if ".mod" in line:
+            f_settings_new.write(line)
+    """
+    for line in importedModList:
+        f_settings_new.write(line)
+
+
+    f.close()
+
+    for line in f_settings_temp2:
+        f_settings_new.write(line)
+
+    f_settings_temp2.close()
+    os.remove(Path(defaultpath) / tempFilename1)
+    os.remove(Path(defaultpath) / tempFilename2)
+    
+    f_settings_new.close()
+
+    """
+    for line in f_settings_temp:
+        if "last_mods" in line:
+            startReadingNext = True
+        elif "}" in line and readlines:
+            stopReadingNext = True
+        if readlines:
+            ImportedModList.append(line)
+        if startReadingNext and not stopReadingNext:
+            readlines = True
+        if stopReadingNext:
+            readlines = False
+        if ".mod" in line and readlines:
+            counter += 1
+    """
 
 def getFilePath():
     print("Opening file dialog...")
@@ -207,13 +287,15 @@ def getFilePath():
 
 print("")
 while True:
-    print("Please choose an option:\n[1] Import mod list to HOI4 from file ($CustomFile.txt -> settings.txt)\n[2] Export mod list from HOI4 to file (settings.txt -> $CustomFile.txt)")
+    print("Please choose an option:\n[1] Import mod list to HOI4 from file ($CustomFile.txt -> settings.txt)\n[2] Export mod list from HOI4 to file (settings.txt -> $CustomFile.txt)\n[3] Abort script")
     choice2 = input()
     if choice2 == "1":
         importModList()
         break
     elif choice2 == "2":
         exportModList(HOI4ModList)
+        break
+    elif choice2 == "3":
         break
     else:
         print("\n#########\nERROR: No valid input provided")
