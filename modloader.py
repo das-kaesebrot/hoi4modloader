@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import time
 import re
 import string
 import platform
@@ -9,11 +10,12 @@ from tkinter import filedialog
 currentOS = platform.system()
 
 # enable this to override checking for path
-overrideDefaultPath = False
+overrideDefaultPath = True
 # Paste your custom path here if above option is enabled
-userDefinedPath = ""
+userDefinedPath1 = "D:\Kaesebrot\Documents\Paradox Interactive\Hearts of Iron IV"
 
 print("### ATTENTION ###")
+print("Do not run this script while Hearts of Iron IV or the Hearts of Iron IV launcher are running!\n")
 
 def setdefaultPath(currentOS):
     path = ""
@@ -37,14 +39,17 @@ def setdefaultPath(currentOS):
 # replace this 
 
 if overrideDefaultPath:
-    defaultpath = userDefinedPath
+    defaultpath = userDefinedPath1
+    print("Default path override: ACTIVATED")
     print("Setting path to " + defaultpath)
 else:
+    print("Default path override: DEACTIVATED")
     defaultpath = setdefaultPath(currentOS)
 
 filename = "settings.txt"
-filepath1 = defaultpath / filename
+filepath1 = Path(defaultpath) / filename
 
+"""
 def ReadFileStatus():
     status = ReadFile(filepath1)
     if status:
@@ -53,50 +58,53 @@ def ReadFileStatus():
         labeltext = "Error reading file"
 
     return;
+"""
 
-def printModNames():
-
-
-
-    return
-
-def ReadFile(filepath):
-
-    success = False
+def ReadFile1(filepath):
+    print("")
     
     exists = os.path.isfile(filepath)
     if not exists:
         print("File not found")
-        return success;
+        return
 
     readlines = False
+    stopReadingNext = False
 
     counter = 0
 
     f = open(filepath, 'r')
 
-    print("Reading settings.txt...")
+    print("Reading settings.txt")
 
     modids = []
+    copyModId = []
 
     for line in f:
+        
         if "last_mods" in line:
             readlines = True
         elif "}" in line and readlines:
+            stopReadingNext = True
+        if readlines:
+            copyModId.append(line)
+        if stopReadingNext:
             readlines = False
+        """
         if ".mod" in line and readlines:
             temp = line
             temp = re.sub("\D", "", temp)
             modids.append(int(temp))
             counter += 1
+        """
+        if ".mod" in line and readlines:
+            counter += 1
+        
+    print("Found " + str(counter) + " active mods in settings.txt")
 
-    print("Found " + str(counter) + " mods")
+    # print(modids)
 
-    print(modids)
-    
-    success = True
-
-    return success;
+    return copyModId
 
 userDefinedPath = ""
 
@@ -116,9 +124,9 @@ def yesno():
             break
         
 
-
-print("Use default path for settings file? (" + str(filepath1) + ")")
-useDefaultPath = yesno()
+if not overrideDefaultPath:
+    print("Use default path for settings file? (" + str(filepath1) + ")")
+    useDefaultPath = yesno()
 
 if not useDefaultPath:
     # print("Please enter user defined read path (not including file name)")
@@ -130,11 +138,63 @@ if not useDefaultPath:
     userDefinedPath = Path(filedialog.askdirectory(title = "Select Hearts of Iron IV Documents folder"))
     filepath1 = userDefinedPath / filename
 
-"""
-if useDefaultPath:
-    filepath2 = filepath1
-else:
-    filepath2 = userDefinedPath
-"""
+HOI4ModList = ReadFile1(filepath1)
 
-ReadFile(filepath1)
+def exportModList(List1):
+    filenameExport = time.strftime("%Y%m%d-%H%M%S") + ".txt"
+    # print("\nExported file will be called " + str(filenameExport))
+    # print("Exported file will be written to " + str(defaultpath))
+    f = open(Path(defaultpath) / filenameExport, "x")
+    for item in HOI4ModList:
+        f.write(item)
+    print("Successfully wrote mod list to " + str(Path(defaultpath) / filenameExport))
+    return
+
+def importModList():
+    print("Please select File to import mod list from")
+    filepathImport = getFilePath()
+
+    counter = 0
+
+    f = open(filepathImport, 'r')
+
+    for line in f:
+        if "last_mods" in line:
+            readlines = True
+        elif "}" in line and readlines:
+            readlines = False
+        else:
+            print("Unable to read file")
+        if readlines:
+            pass
+        """
+        if ".mod" in line and readlines:
+            temp = line
+            temp = re.sub("\D", "", temp)
+            modids.append(int(temp))
+            counter += 1
+        """
+
+        if ".mod" in line and readlines:
+            counter += 1
+        
+    print("Found " + str(counter) + " active mods")
+
+def getFilePath():
+    print("Opening file dialog...")
+    root = tkinter.Tk()
+    root.withdraw()
+    userDefinedPath = Path(filedialog.askopenfile(title = "Select Text File"), filetypes = (("Text files","*.txt"),("all files","*.*")))
+    return userDefinedPath
+
+while True:
+    print("\nPlease choose an option:\n[1] Import mod list to HOI4 from file ($CustomFile.txt -> settings.txt)\n[2] Export mod list from HOI4 to file (settings.txt -> $CustomFile.txt)")
+    choice2 = input()
+    if choice2 == "1":
+        importModList()
+        break
+    elif choice2 == "2":
+        exportModList(HOI4ModList)
+        break
+    else:
+        print("No valid input provided")
