@@ -70,6 +70,8 @@ def ReadFileStatus():
     return;
 """
 
+ModsDetected = False
+
 def ReadFile1(filepath):
     print("")
     
@@ -110,9 +112,11 @@ def ReadFile1(filepath):
         if ".mod" in line and readlines:
             counter += 1
         
-    print("Found " + str(counter) + " active mods in settings.txt")
-
-    # print(modids)
+    if counter == 0:
+        print("No mods detected in settings.txt")
+    else:
+        print("Found " + str(counter) + " active mods in settings.txt")
+        ModsDetected = True
 
     f.close()
 
@@ -200,6 +204,7 @@ def importModList():
 
     skipLines = False
     part1Done = False
+    announcePart1Done = False
 
     f_settings_old = open(filepath1, 'r')
     f_settings_temp1 = open(Path(defaultpath) / tempFilename1, 'x')
@@ -209,10 +214,16 @@ def importModList():
             f_settings_temp1.write(line)
         if "last_mods" in line:
             skipLines = True
+        elif "hints=" in line:
+            if not ModsDetected:
+                skipLines = True
+                announcePart1Done = True
         elif "}" in line and skipLines:
             part1Done = True
         if part1Done:
             f_settings_temp2.write(line)
+        if announcePart1Done:
+            part1Done = True
 
     f_settings_old.close()
     f_settings_temp1.close()
@@ -235,10 +246,14 @@ def importModList():
         if ".mod" in line:
             f_settings_new.write(line)
     """
-
+    if not ModsDetected:
+        f_settings_new.write("last_mods={\n")
+    
     for line in importedModList:
         f_settings_new.write(line)
-
+    
+    if not ModsDetected:
+        f_settings_new.write("}\n")
 
     f.close()
 
