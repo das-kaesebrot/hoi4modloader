@@ -154,7 +154,7 @@ if not useDefaultPath:
 HOI4ModList = ReadFile1(filepath1)
 
 def exportModList(List1):
-    filenameExport = time.strftime("%Y%m%d-%H%M%S") + ".txt"
+    filenameExport = "modlist_" + time.strftime("%Y%m%d-%H%M%S") + ".txt"
     # print("\nExported file will be called " + str(filenameExport))
     # print("Exported file will be written to " + str(defaultpath))
     f = open(Path(defaultpath) / filenameExport, "x")
