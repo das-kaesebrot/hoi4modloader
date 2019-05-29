@@ -10,7 +10,7 @@ from tkinter import filedialog
 ### PROGRAM VARIABLES FOR CUSTOMIZATION ###################################################
 
 # enable this to override checking for path
-overrideDefaultPath = True
+overrideDefaultPath = False
 # Paste your custom path here if above option is enabled
 userDefinedPath1 = "D:\Kaesebrot\Documents\Paradox Interactive\Hearts of Iron IV"
 # NOT RECOMMENDED - set this to False to turn off automatic backups when making changes to settings.txt file
@@ -194,23 +194,11 @@ def importModList():
     else:
         print("Skipping backup of settings.txt")
     
-    """
-    tempFilename = "temp-settings.txt"
+    print("Replacing mods...")
 
-    f2 = open(filepath1, 'r')
-    f3 = open(Path(defaultpath) / tempFilename, 'x')
-    for line in f2:
-        f3.write(line)
-    f2.close()
-    f3.close()
-    """
-    
     tempFilename1 = "settings.txt.part1.TEMP"
     tempFilename2 = "settings.txt.part2.TEMP"
 
-    # readlines = False
-    # stopReadingNext = False
-    # startReadingNext = False
     skipLines = False
     part1Done = False
 
@@ -242,11 +230,13 @@ def importModList():
     
     f_settings_temp1.close()
 
+    # somehow this doesn't work?
     """
     for line in f:
         if ".mod" in line:
             f_settings_new.write(line)
     """
+
     for line in importedModList:
         f_settings_new.write(line)
 
@@ -262,21 +252,7 @@ def importModList():
     
     f_settings_new.close()
 
-    """
-    for line in f_settings_temp:
-        if "last_mods" in line:
-            startReadingNext = True
-        elif "}" in line and readlines:
-            stopReadingNext = True
-        if readlines:
-            ImportedModList.append(line)
-        if startReadingNext and not stopReadingNext:
-            readlines = True
-        if stopReadingNext:
-            readlines = False
-        if ".mod" in line and readlines:
-            counter += 1
-    """
+    print("Done!")
 
 def getFilePath():
     print("Opening file dialog...")
