@@ -6,17 +6,43 @@ import string
 import platform
 import tkinter
 from tkinter import filedialog
+import configparser
 
 ### PROGRAM VARIABLES FOR CUSTOMIZATION ###################################################
 
 # enable this to override checking for path
-overrideDefaultPath = False
+# overrideDefaultPath = False
 # Paste your custom path here if above option is enabled
-userDefinedPath1 = "D:\Kaesebrot\Documents\Paradox Interactive\Hearts of Iron IV"
+# userDefinedPath1 = "D:\Kaesebrot\Documents\Paradox Interactive\Hearts of Iron IV"
 # NOT RECOMMENDED - set this to False to turn off automatic backups when making changes to settings.txt file
-doBackup = True
+# doBackup = True
 
 ##########################################################################################
+
+config = configparser.ConfigParser()
+userDefinedPath1 = ""
+doBackup = True
+overrideDefaultPath = False
+
+useconfigFile = False
+
+if useconfigFile:
+    print("")
+    #generates config file if it doesn't exist
+    if not os.path.isfile(Path(os.curdir) / 'config.cfg'):
+        print("Generating config file...")
+        config['Switches'] = {'overrideDefaultPath': 'no',
+                            'doSettingsBackup': 'yes'}
+        config['Paths'] = {'userDefinedPath': ''}
+        with open('config.ini', 'w') as configfile:
+            config.write(configfile)
+    else:
+        print("Reading config file...")
+        config.read('config.cfg')
+        overrideDefaultPath = config['Switches'].getboolean('overrideDefaultPath')
+        doBackup = config['Switches'].getboolean('doSettingsBackup')
+        userDefinedPath1 = config['Paths'].get('userDefinedPath')
+
 
 currentOS = platform.system()
 
