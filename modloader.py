@@ -65,7 +65,7 @@ def ReadFile1(filepath):
     
     exists = os.path.isfile(filepath)
     if not exists:
-        print("File not found")
+        print("ERROR: File not found")
         return
 
     readlines = False
@@ -77,7 +77,7 @@ def ReadFile1(filepath):
 
     print("Reading settings.txt")
 
-    modids = []
+    # modids = []
     copyModId = []
 
     for line in f:
@@ -103,6 +103,8 @@ def ReadFile1(filepath):
     print("Found " + str(counter) + " active mods in settings.txt")
 
     # print(modids)
+
+    f.close()
 
     return copyModId
 
@@ -148,25 +150,31 @@ def exportModList(List1):
     for item in HOI4ModList:
         f.write(item)
     print("Successfully wrote mod list to " + str(Path(defaultpath) / filenameExport))
+    f.close()
     return
 
 def importModList():
-    print("Please select File to import mod list from")
-    filepathImport = getFilePath()
+    print("Please select file to import mod list from")
+    filepathImport = Path(getFilePath())
 
     counter = 0
 
     f = open(filepathImport, 'r')
 
+    readlines = False
+    stopReadingNext = False
+
+    ImportedModList = []
+
     for line in f:
         if "last_mods" in line:
             readlines = True
         elif "}" in line and readlines:
-            readlines = False
-        else:
-            print("Unable to read file")
+            stopReadingNext = True
         if readlines:
-            pass
+            ImportedModList.append(line)
+        if stopReadingNext:
+            readlines = False
         """
         if ".mod" in line and readlines:
             temp = line
@@ -174,21 +182,32 @@ def importModList():
             modids.append(int(temp))
             counter += 1
         """
-
         if ".mod" in line and readlines:
             counter += 1
-        
-    print("Found " + str(counter) + " active mods")
+    
+    print("Found " + str(counter) + " mods in file")
+
+    filenameBackup = time.strftime("settings_backup_" + "%Y%m%d-%H%M%S") + ".txt"
+
+    f2 = open(filepath1, 'r')
+    f3 = open(Path(defaultpath) / filenameBackup, 'x')
+    for line in f2:
+        f3.write(line)
+    f2.close()
+    f3.close()
+    print("Wrote backup of settings.txt to " + str(Path(defaultpath) / filenameBackup))
+
 
 def getFilePath():
     print("Opening file dialog...")
     root = tkinter.Tk()
     root.withdraw()
-    userDefinedPath = Path(filedialog.askopenfile(title = "Select Text File"), filetypes = (("Text files","*.txt"),("all files","*.*")))
-    return userDefinedPath
+    userDefinedPath = Path(filedialog.askopenfilename(title = "Select Text File"), filetypes = (("Text files","*.txt"),("all files","*.*")))
+    return str(userDefinedPath)
 
+print("")
 while True:
-    print("\nPlease choose an option:\n[1] Import mod list to HOI4 from file ($CustomFile.txt -> settings.txt)\n[2] Export mod list from HOI4 to file (settings.txt -> $CustomFile.txt)")
+    print("Please choose an option:\n[1] Import mod list to HOI4 from file ($CustomFile.txt -> settings.txt)\n[2] Export mod list from HOI4 to file (settings.txt -> $CustomFile.txt)")
     choice2 = input()
     if choice2 == "1":
         importModList()
@@ -197,4 +216,4 @@ while True:
         exportModList(HOI4ModList)
         break
     else:
-        print("No valid input provided")
+        print("\n#########\nERROR: No valid input provided")
