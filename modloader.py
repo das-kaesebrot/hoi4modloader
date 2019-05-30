@@ -12,7 +12,7 @@ import configparser
 
 # enable this to override checking for path
 overrideDefaultPath = False
-# Paste your custom path here if above option is enabled
+# Paste your custom path to the HOI4 doc folder here if above option is enabled
 userDefinedPath1 = ""
 # set this to False to turn off automatic backups when making changes to settings.txt file
 doBackup = True
@@ -90,8 +90,8 @@ def ReadFile1(filepath):
     
     exists = os.path.isfile(filepath)
     if not exists:
-        print("ERROR: File not found")
-        return
+        input("ERROR: File not found\nAborting script\nPress any key to exit...")
+        quit()
 
     readlines = False
     stopReadingNext = False
@@ -126,7 +126,7 @@ def ReadFile1(filepath):
     if counter == 0:
         print("No mods detected in settings.txt")
     else:
-        print("Found " + str(counter) + " active mods in settings.txt")
+        print("Found " + str(counter) + " active mod(s) in settings.txt")
         ModsDetected = True
 
     f.close()
@@ -186,7 +186,7 @@ def importModList():
             importedModList.append(line)
             counter += 1
     
-    print("Found " + str(counter) + " mods in file")
+    print("Found " + str(counter) + " mod(s) in file")
 
     if doBackup:
         filenameBackup = time.strftime("settings_backup_" + "%Y%m%d-%H%M%S") + ".txt"
@@ -201,7 +201,7 @@ def importModList():
     else:
         print("Skipping backup of settings.txt")
     
-    print("Replacing mods...")
+    print("Replacing mod(s)...")
 
     tempFilename1 = "settings.txt.part1.TEMP"
     tempFilename2 = "settings.txt.part2.TEMP"
