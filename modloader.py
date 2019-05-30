@@ -51,17 +51,19 @@ currentOS = platform.system()
 
 def setdefaultPath(currentOS):
     path = ""
-    print("Detected OS: " + currentOS)
     if currentOS == "Linux":
         path = os.path.join(os.path.expanduser('~'),".local","share","Paradox Interactive","Hearts of Iron IV")
-    # elif currentOS == "Darwin":
-    #     path = "~/Documents/Paradox Interactive/Hearts of Iron IV"
+    elif currentOS == "Darwin":
+        path = os.path.join(os.path.expanduser('~'),"Documents","Paradox Interactive","Hearts of Iron IV")
+        currentOS = "macOS"
     elif currentOS == "Windows":
         path = os.path.join(os.path.expandvars("%userprofile%"),"Documents","Paradox Interactive","Hearts of Iron IV")
     else:
-        currentOS = "OS not detected"
         path = ""
         print("Unable to detect OS, please point to HOI4 Documents folder manually")
+        return
+    print("Detected OS: " + currentOS)
+    
     print("Default path was automatically set to: " + path + "\n")
     
     path2 = Path(path)
