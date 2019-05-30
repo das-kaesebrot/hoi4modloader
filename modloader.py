@@ -63,7 +63,6 @@ def setdefaultPath(currentOS):
         print("Unable to detect OS, please point to HOI4 Documents folder manually")
         return
     print("Detected OS: " + currentOS)
-    
     print("Default path was automatically set to: " + path + "\n")
     
     path2 = Path(path)
@@ -250,6 +249,7 @@ def importModList():
         if ".mod" in line:
             f_settings_new.write(line)
     """
+    
     if not ModsDetected:
         f_settings_new.write("last_mods={\n")
     
