@@ -17,7 +17,7 @@ userDefinedPath1 = ""
 # set this to False to turn off automatic backups when making changes to settings.txt file
 doBackup = True
 # set this to True to use a config file to set the above 3 options
-useconfigFile = False
+useconfigFile = True
 
 ##########################################################################################
 
@@ -159,6 +159,7 @@ if not useDefaultPath:
     root = tkinter.Tk()
     root.withdraw()
     userDefinedPath = Path(filedialog.askdirectory(title = "Select Hearts of Iron IV Documents folder"))
+    defaultpath = userDefinedPath
     filepath1 = userDefinedPath / filename
 
 HOI4ModList = ReadFile1(filepath1)
