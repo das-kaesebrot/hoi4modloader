@@ -21,7 +21,10 @@ useconfigFile = True
 
 ##########################################################################################
 
-print("\n\tScript written by")
+currentVersion = "1.0.12"
+
+print("\n\thoi4modloader, version " + currentVersion)
+print("\tScript written by")
 print("\tKaesebrot - @das_kaesebrot\n")
 print("### ATTENTION ###")
 print("Do not run this script while Hearts of Iron IV or the Hearts of Iron IV launcher are running!\n")
