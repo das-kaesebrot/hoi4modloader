@@ -6,5 +6,5 @@ You can find a standalone Windows executable (generated using PyInstaller) in th
 
 You can use the provided ``config.ini`` to override the default path in which the script looks for the ``settings.txt`` file.
 
-## Prerequisites
+## Prerequisites (if you're not using the Windows executable)
 ``Python 3`` (I think)
