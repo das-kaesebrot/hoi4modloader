@@ -21,7 +21,7 @@ useconfigFile = True
 
 ##########################################################################################
 
-currentVersion = "1.0.12"
+currentVersion = "1.0.13"
 
 print("\n\thoi4modloader, version " + currentVersion)
 print("\tScript written by")
@@ -48,7 +48,7 @@ if useconfigFile:
         config.read(configname)
         overrideDefaultPath = config['Switches'].getboolean('overrideDefaultPath')
         doBackup = config['Switches'].getboolean('doSettingsBackup')
-        userDefinedPath1 = config['Paths'].get('userDefinedPath')
+        userDefinedPath1 = Path(config['Paths'].get('userDefinedPath'))
 
 currentOS = platform.system()
 
@@ -85,7 +85,7 @@ if not doBackup:
 filename = "settings.txt"
 filepath1 = Path(defaultpath) / filename
 
-ModsDetected = False
+# ModsDetected = False
 
 def ReadFile1(filepath):
     print("")
@@ -95,8 +95,9 @@ def ReadFile1(filepath):
         input("ERROR: File not found\nAborting script\nPress any key to exit...")
         quit()
 
-    readlines = False
-    stopReadingNext = False
+    # readlines = False
+    # stopReadingNext = False
+    
     counter = 0
     f = open(filepath, 'r')
     copyModId = []
@@ -105,6 +106,7 @@ def ReadFile1(filepath):
 
     for line in f:
         
+        """
         if "last_mods" in line:
             readlines = True
         elif "}" in line and readlines:
@@ -115,21 +117,23 @@ def ReadFile1(filepath):
             readlines = False
         
         # Keeping this for later for optional Steam API support        
-        """
+        
         if ".mod" in line and readlines:
             temp = line
             temp = re.sub("\D", "", temp)
             modids.append(int(temp))
             counter += 1
         """
-        if ".mod" in line and readlines:
+
+        if ".mod" in line:
+            copyModId.append(line)
             counter += 1
         
     if counter == 0:
         print("No mods detected in settings.txt")
     else:
         print("Found " + str(counter) + " active mod(s) in settings.txt")
-        ModsDetected = True
+        # ModsDetected = True
 
     f.close()
 
@@ -143,7 +147,7 @@ useDefaultPath = True
 def yesno():
     while True:
         # print("[y/n]")
-        choice1 = input("[y/n] ")
+        choice1 = input("[y/n] > ")
         choice1 = choice1.lower()
         if choice1 == 'y':
             return True
@@ -209,25 +213,30 @@ def importModList():
     tempFilename1 = "settings.txt.part1.TEMP"
     tempFilename2 = "settings.txt.part2.TEMP"
 
-    skipLines = False
+    # skipLines = False
     part1Done = False
+    part2Write = False
     announcePart1Done = False
 
     f_settings_old = open(filepath1, 'r')
     f_settings_temp1 = open(Path(defaultpath) / tempFilename1, 'x')
     f_settings_temp2 = open(Path(defaultpath) / tempFilename2, 'x')
     for line in f_settings_old:
-        if not skipLines and not part1Done:
-            f_settings_temp1.write(line)
-        if "last_mods" in line:
-            skipLines = True
-        elif "hints=" in line:
-            if not ModsDetected:
-                skipLines = True
-                announcePart1Done = True
-        elif "}" in line and skipLines:
-            part1Done = True
-        if part1Done:
+        # if not skipLines and not part1Done:
+            # f_settings_temp1.write(line)
+        # if "last_mods" in line:
+            # skipLines = True
+        # elif "}" in line and skipLines:
+            # part1Done = True
+        if not part1Done:
+                f_settings_temp1.write(line)
+        if "hints=" in line:
+            announcePart1Done = True
+            # if not ModsDetected:
+                # skipLines = True
+        if "counter_color_mode=" in line:
+            part2Write = True
+        if part1Done and part2Write:
             f_settings_temp2.write(line)
         if announcePart1Done:
             part1Done = True
@@ -254,14 +263,18 @@ def importModList():
             f_settings_new.write(line)
     """
     
-    if not ModsDetected:
-        f_settings_new.write("last_mods={\n")
+    # if not ModsDetected:
+    #     f_settings_new.write("last_mods={\n")
     
+    f_settings_new.write("last_mods={\n")
+
     for line in importedModList:
         f_settings_new.write(line)
     
-    if not ModsDetected:
-        f_settings_new.write("}\n")
+    f_settings_new.write("}\n")
+    
+    # if not ModsDetected:
+    #     f_settings_new.write("}\n")
 
     f.close()
 
