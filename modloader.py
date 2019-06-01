@@ -48,7 +48,7 @@ if useconfigFile:
         config.read(configname)
         overrideDefaultPath = config['Switches'].getboolean('overrideDefaultPath')
         doBackup = config['Switches'].getboolean('doSettingsBackup')
-        userDefinedPath1 = Path(config['Paths'].get('userDefinedPath'))
+        userDefinedPath1 = config['Paths'].get('userDefinedPath')
 
 currentOS = platform.system()
 
