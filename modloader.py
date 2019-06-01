@@ -165,9 +165,8 @@ if not useDefaultPath:
     print("Opening file dialog...")
     root = tkinter.Tk()
     root.withdraw()
-    userDefinedPath = Path(filedialog.askdirectory(title = "Select Hearts of Iron IV Documents folder"))
-    defaultpath = userDefinedPath
-    filepath1 = userDefinedPath / filename
+    defaultpath = Path(filedialog.askdirectory(title = "Select Hearts of Iron IV Documents folder"))
+    filepath1 = defaultpath / filename
 
 HOI4ModList = ReadFile1(filepath1)
 
