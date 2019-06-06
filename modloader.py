@@ -288,6 +288,72 @@ def importModList():
 
     print("Done!")
 
+def clearModList():
+
+    if doBackup:
+        filenameBackup = time.strftime("settings_backup_" + "%Y%m%d-%H%M%S") + ".txt"
+
+        f2 = open(filepath1, 'r')
+        f3 = open(Path(defaultpath) / filenameBackup, 'x')
+        for line in f2:
+            f3.write(line)
+        f2.close()
+        f3.close()
+        print("Wrote backup of settings.txt to " + str(Path(defaultpath) / filenameBackup))
+    else:
+        print("Skipping backup of settings.txt")
+    
+    print("Clearing mod(s)...")
+
+    tempFilename1 = "settings.txt.part1.TEMP"
+    tempFilename2 = "settings.txt.part2.TEMP"
+
+    # skipLines = False
+    part1Done = False
+    part2Write = False
+    announcePart1Done = False
+
+    f_settings_old = open(filepath1, 'r')
+    f_settings_temp1 = open(Path(defaultpath) / tempFilename1, 'x')
+    f_settings_temp2 = open(Path(defaultpath) / tempFilename2, 'x')
+    for line in f_settings_old:
+        if not part1Done:
+                f_settings_temp1.write(line)
+        if "hints=" in line:
+            announcePart1Done = True
+        if "counter_color_mode=" in line:
+            part2Write = True
+        if part1Done and part2Write:
+            f_settings_temp2.write(line)
+        if announcePart1Done:
+            part1Done = True
+
+    f_settings_old.close()
+    f_settings_temp1.close()
+    f_settings_temp2.close()
+
+    f_settings_temp1 = open(Path(defaultpath) / tempFilename1, 'r')
+    f_settings_temp2 = open(Path(defaultpath) / tempFilename2, 'r')
+    
+    os.remove(filepath1)
+
+    f_settings_new = open(filepath1, "x")
+    for line in f_settings_temp1:
+        f_settings_new.write(line)
+    
+    f_settings_temp1.close()
+
+    for line in f_settings_temp2:
+        f_settings_new.write(line)
+
+    f_settings_temp2.close()
+    os.remove(Path(defaultpath) / tempFilename1)
+    os.remove(Path(defaultpath) / tempFilename2)
+    
+    f_settings_new.close()
+
+    print("Done!")
+
 def getFilePath():
     print("Opening file dialog...")
     root = tkinter.Tk()
@@ -297,8 +363,8 @@ def getFilePath():
 
 print("")
 while True:
-    print("Please choose an option:\n[1] Import mod list to HOI4 from file ($CustomFile.txt -> settings.txt)\n[2] Export mod list from HOI4 to file (settings.txt -> $CustomFile.txt)\n[3] Abort script")
-    choice2 = input("> ")
+    print("Please choose an option:\n[1] Import mod list to HOI4 from file ($CustomFile.txt -> settings.txt)\n[2] Export mod list from HOI4 to file (settings.txt -> $CustomFile.txt)\n[3] Clear mods from settings.txt\n[q] Abort script")
+    choice2 = input("> ").lower()
     if choice2 == "1":
         importModList()
         break
@@ -306,6 +372,9 @@ while True:
         exportModList(HOI4ModList)
         break
     elif choice2 == "3":
+        clearModList()
+        break
+    elif choice2 == "q":
         break
     else:
         print("\n#########\nERROR: No valid input provided")
