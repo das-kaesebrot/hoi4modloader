@@ -21,7 +21,7 @@ useconfigFile = True
 
 ##########################################################################################
 
-currentVersion = "1.0.13"
+currentVersion = "1.0.14"
 
 print("\n\thoi4modloader, version " + currentVersion)
 print("\tScript written by")
