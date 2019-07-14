@@ -14,6 +14,10 @@ import configparser
 overrideDefaultPath = False
 # Paste your custom path to the HOI4 doc folder here if above option is enabled
 userDefinedPath1 = ""
+# enable this to override the mod list output folder to a custom path (Next option)
+setCustomOutputPath = False
+# Paste your custom path to the output folder the mod list files should be exported to here
+userDefinedOutputPath = ""
 # set this to False to turn off automatic backups when making changes to settings.txt file
 doBackup = True
 # set this to True to use a config file to set the above 3 options
@@ -21,7 +25,7 @@ useconfigFile = True
 
 ##########################################################################################
 
-currentVersion = "1.0.14"
+currentVersion = "1.0.15"
 
 print("\n\thoi4modloader, version " + currentVersion)
 print("\tScript written by")
@@ -37,8 +41,10 @@ if useconfigFile:
     if not os.path.isfile(Path(os.curdir) / configname):
         print("Generating config file...\n")
         config['Switches'] = {'overrideDefaultPath': 'no',
+                            'setCustomOutputPath': 'no',
                             'doSettingsBackup': 'yes'}
-        config['Paths'] = {'userDefinedPath': ''}
+        config['Paths'] = {'userDefinedInput': '',
+                            'userDefinedOutput': ''}
         with open(configname, 'w') as configfile:
             config.write(configfile)
     
@@ -47,8 +53,10 @@ if useconfigFile:
         print("Reading config file...\n")
         config.read(configname)
         overrideDefaultPath = config['Switches'].getboolean('overrideDefaultPath')
+        setCustomOutputPath = config['Switches'].getboolean('setCustomOutputPath')
         doBackup = config['Switches'].getboolean('doSettingsBackup')
-        userDefinedPath1 = config['Paths'].get('userDefinedPath')
+        userDefinedPath1 = config['Paths'].get('userDefinedInput')
+        userDefinedOutputPath = config['Paths'].get('userDefinedOutput')
 
 currentOS = platform.system()
 
@@ -78,6 +86,12 @@ if overrideDefaultPath:
 else:
     print("Default path override: DEACTIVATED")
     defaultpath = setdefaultPath(currentOS)
+
+if setCustomOutputPath:
+    print("Custom export path: ACTIVATED")
+    print("Setting mod list export path to " + userDefinedOutputPath)
+else:
+    print("Custom export path: DEACTIVATED")
 
 if not doBackup:
     print("\nAutomatic backup: DEACTIVATED")
@@ -172,10 +186,15 @@ HOI4ModList = ReadFile1(filepath1)
 
 def exportModList(List1):
     filenameExport = "modlist_" + time.strftime("%Y%m%d-%H%M%S") + ".txt"
-    f = open(Path(defaultpath) / filenameExport, "x")
+    # custom Path override
+    outpath = defaultpath
+    if setCustomOutputPath:
+        outpath = Path(userDefinedOutputPath)
+    
+    f = open(Path(outpath) / filenameExport, "x")
     for item in HOI4ModList:
         f.write(item)
-    print("Successfully wrote mod list to " + str(Path(defaultpath) / filenameExport))
+    print("Successfully wrote mod list to " + str(Path(outpath) / filenameExport))
     f.close()
     return
 
