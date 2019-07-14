@@ -91,7 +91,7 @@ if setCustomOutputPath:
     print("Custom export path: ACTIVATED")
     print("Setting mod list export path to " + userDefinedOutputPath)
 else:
-    print("Custom export path: DEACTIVATED")
+    print("Custom export path: DEACTIVATED\n")
 
 if not doBackup:
     print("\nAutomatic backup: DEACTIVATED")
