@@ -8,3 +8,6 @@ You can use the provided ``config.ini`` to override the default path in which th
 
 ## Prerequisites (if you're not using the binaries)
 ``Python 3``
+
+## Other
+This might possibly also work with other Paradox games that use the Paradox Launcher, haven't tested it yet though.
