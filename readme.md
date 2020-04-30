@@ -7,6 +7,10 @@ You can find a standalone Windows executable and a Linux binary (generated using
 You can use the provided ``config.ini`` to override the default path in which the script looks for the ``dlc_load.json`` file.
 The config file will be automatically generated next to the executable/binary if it doesn't exist yet.
 
+## Compatibility
+This version of the program only works with Hearts of Iron IV versions 1.8.* and upwards.
+For compatibility with older Hearts of Iron IV versions, please see the [legacy branch](https://github.com/das-kaesebrot/hoi4modloader/tree/legacy) of this repository.
+
 ## Prerequisites (if you're not using the binaries)
 ``Python 3``
 
