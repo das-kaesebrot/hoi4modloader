@@ -4,7 +4,6 @@ import time
 import string
 import platform
 import tkinter
-import json
 from tkinter import filedialog
 import configparser
 
@@ -18,20 +17,21 @@ userDefinedPath1 = ""
 setCustomOutputPath = False
 # Paste your custom path to the output folder the mod list files should be exported to here
 userDefinedOutputPath = ""
-# set this to False to turn off automatic backups when making changes to dlc_load.json file
+# set this to False to turn off automatic backups when making changes to settings.txt file
 doBackup = True
 # set this to True to use a config file to set the above 3 options
 useconfigFile = True
 
 ##########################################################################################
 
-currentVersion = "2.0.1"
+currentVersion = "1.0.15"
 
 print("\n\thoi4modloader, version " + currentVersion)
 print("\tScript written by")
 print("\tKaesebrot - @das_kaesebrot\n")
 print("### ATTENTION ###")
 print("Do not run this script while Hearts of Iron IV or the Hearts of Iron IV launcher are running!\n")
+print("This version of the script only works with HOI4 up to version 1.7.*. For versions 1.8.* and higher, please download the latest release.\n")
 
 config = configparser.ConfigParser()
 
@@ -91,38 +91,66 @@ if setCustomOutputPath:
     print("Custom export path: ACTIVATED")
     print("Setting mod list export path to " + userDefinedOutputPath)
 else:
-    print("Custom export path: DEACTIVATED\n")
+    print("Custom export path: DEACTIVATED")
 
 if not doBackup:
     print("\nAutomatic backup: DEACTIVATED")
 
-filename = "dlc_load.json"
-path1 = Path(defaultpath)
+filename = "settings.txt"
+filepath1 = Path(defaultpath) / filename
 
-def getJSONDict(filepath1):
+# ModsDetected = False
+
+def ReadFile1(filepath):
     print("")
-    exists = os.path.isfile(filepath1)
+    
+    exists = os.path.isfile(filepath)
     if not exists:
         input("ERROR: File not found\nAborting script\nPress any key to exit...")
         quit()
+
+    # readlines = False
+    # stopReadingNext = False
     
-    f = open(filepath1, 'r')
-    readDict = json.load(f)
-    f.close()
-    return readDict
+    counter = 0
+    f = open(filepath, 'r')
+    copyModId = []
 
-def ReadFile1(filepath):
-    dlc_load_dict = getJSONDict(filepath / filename)
+    print("Reading settings.txt")
 
-    copyModId = dlc_load_dict.get("enabled_mods")
-
-    print("Reading " + filename)
+    for line in f:
         
-    if not copyModId:
-        print("No mods detected in  " + filename)
+        """
+        if "last_mods" in line:
+            readlines = True
+        elif "}" in line and readlines:
+            stopReadingNext = True
+        if readlines:
+            copyModId.append(line)
+        if stopReadingNext:
+            readlines = False
+        
+        # Keeping this for later for optional Steam API support        
+        
+        if ".mod" in line and readlines:
+            temp = line
+            temp = re.sub("\D", "", temp)
+            modids.append(int(temp))
+            counter += 1
+        """
+
+        if ".mod" in line:
+            copyModId.append(line)
+            counter += 1
+        
+    if counter == 0:
+        print("No mods detected in settings.txt")
     else:
-        print("Found " + str(len(copyModId)) + " active mod(s) in " + filename)
-        
+        print("Found " + str(counter) + " active mod(s) in settings.txt")
+        # ModsDetected = True
+
+    f.close()
+
     return copyModId
 
 userDefinedPath = ""
@@ -137,14 +165,14 @@ def yesno():
         choice1 = choice1.lower()
         if choice1 == 'y':
             return True
-            # break
+            break
         elif choice1 == 'n':
             return False
-            # break
+            break
         
 
 if not overrideDefaultPath:
-    print("Use default path for " + filename + " file? (" + str(path1 / filename) + ")")
+    print("Use default path for settings file? (" + str(filepath1) + ")")
     useDefaultPath = yesno()
 
 if not useDefaultPath:
@@ -152,90 +180,196 @@ if not useDefaultPath:
     root = tkinter.Tk()
     root.withdraw()
     defaultpath = Path(filedialog.askdirectory(title = "Select Hearts of Iron IV Documents folder"))
-    path1 = defaultpath
+    filepath1 = defaultpath / filename
 
-HOI4ModList = ReadFile1(path1)
+HOI4ModList = ReadFile1(filepath1)
 
 def exportModList(List1):
-    filenameExport = "modlist_" + time.strftime("%Y%m%d-%H%M%S") + ".json"
+    filenameExport = "modlist_" + time.strftime("%Y%m%d-%H%M%S") + ".txt"
     # custom Path override
     outpath = defaultpath
     if setCustomOutputPath:
         outpath = Path(userDefinedOutputPath)
-
-    dictModList = {'enabled_mods': HOI4ModList}
-
-    with open(Path(outpath) / filenameExport, 'w') as fp:
-        json.dump(dictModList, fp)
-
+    
+    f = open(Path(outpath) / filenameExport, "x")
+    for item in HOI4ModList:
+        f.write(item)
     print("Successfully wrote mod list to " + str(Path(outpath) / filenameExport))
+    f.close()
     return
 
 def importModList():
     print("Please select file to import mod list from")
-    
     filepathImport = Path(getFilePath())
-    
+
+    counter = 0
+    importedModList = []
     f = open(filepathImport, 'r')
-    dlc_load_dict = getJSONDict(filepathImport)
-    f.close()
-    copyModId = dlc_load_dict.get("enabled_mods")
+
+    for line in f:
+        if ".mod" in line:
+            importedModList.append(line)
+            counter += 1
     
-    print("Found " + str(len(copyModId)) + " active mod(s) in file")
+    print("Found " + str(counter) + " mod(s) in file")
 
     if doBackup:
-        filenameBackup = time.strftime("dlc_load_backup_" + "%Y%m%d-%H%M%S") + ".json"
+        filenameBackup = time.strftime("settings_backup_" + "%Y%m%d-%H%M%S") + ".txt"
 
-        f2 = open(path1 / filename, 'r')
+        f2 = open(filepath1, 'r')
         f3 = open(Path(defaultpath) / filenameBackup, 'x')
         for line in f2:
             f3.write(line)
         f2.close()
         f3.close()
-        print("Wrote backup of " + filename + " to " + str(Path(defaultpath) / filenameBackup))
+        print("Wrote backup of settings.txt to " + str(Path(defaultpath) / filenameBackup))
     else:
-        print("Skipping backup of " + filename)
+        print("Skipping backup of settings.txt")
     
     print("Replacing mod(s)...")
 
-    f_settings_old = open(path1 / filename, 'r')
-    dictDLCLoadJSON = json.load(f_settings_old)
+    tempFilename1 = "settings.txt.part1.TEMP"
+    tempFilename2 = "settings.txt.part2.TEMP"
+
+    # skipLines = False
+    part1Done = False
+    part2Write = False
+    announcePart1Done = False
+
+    f_settings_old = open(filepath1, 'r')
+    f_settings_temp1 = open(Path(defaultpath) / tempFilename1, 'x')
+    f_settings_temp2 = open(Path(defaultpath) / tempFilename2, 'x')
+    for line in f_settings_old:
+        # if not skipLines and not part1Done:
+            # f_settings_temp1.write(line)
+        # if "last_mods" in line:
+            # skipLines = True
+        # elif "}" in line and skipLines:
+            # part1Done = True
+        if not part1Done:
+                f_settings_temp1.write(line)
+        if "hints=" in line:
+            announcePart1Done = True
+            # if not ModsDetected:
+                # skipLines = True
+        if "counter_color_mode=" in line:
+            part2Write = True
+        if part1Done and part2Write:
+            f_settings_temp2.write(line)
+        if announcePart1Done:
+            part1Done = True
+
     f_settings_old.close()
-    os.remove(path1 / filename)
+    f_settings_temp1.close()
+    f_settings_temp2.close()
 
-    dictDLCLoadJSON["enabled_mods"] = copyModId
+    f_settings_temp1 = open(Path(defaultpath) / tempFilename1, 'r')
+    f_settings_temp2 = open(Path(defaultpath) / tempFilename2, 'r')
+    
+    os.remove(filepath1)
 
-    with open(path1 / filename, 'x') as fp:
-        json.dump(dictDLCLoadJSON, fp)
+    f_settings_new = open(filepath1, "x")
+    for line in f_settings_temp1:
+        f_settings_new.write(line)
+    
+    f_settings_temp1.close()
+
+    # somehow this doesn't work?
+    """
+    for line in f:
+        if ".mod" in line:
+            f_settings_new.write(line)
+    """
+    
+    # if not ModsDetected:
+    #     f_settings_new.write("last_mods={\n")
+    
+    f_settings_new.write("last_mods={\n")
+
+    for line in importedModList:
+        f_settings_new.write(line)
+    
+    f_settings_new.write("}\n")
+    
+    # if not ModsDetected:
+    #     f_settings_new.write("}\n")
+
+    f.close()
+
+    for line in f_settings_temp2:
+        f_settings_new.write(line)
+
+    f_settings_temp2.close()
+    os.remove(Path(defaultpath) / tempFilename1)
+    os.remove(Path(defaultpath) / tempFilename2)
+    
+    f_settings_new.close()
 
     print("Done!")
 
 def clearModList():
 
     if doBackup:
-        filenameBackup = time.strftime("dlc_load_backup_" + "%Y%m%d-%H%M%S") + ".json"
+        filenameBackup = time.strftime("settings_backup_" + "%Y%m%d-%H%M%S") + ".txt"
 
-        f2 = open(path1 / filename, 'r')
+        f2 = open(filepath1, 'r')
         f3 = open(Path(defaultpath) / filenameBackup, 'x')
         for line in f2:
             f3.write(line)
         f2.close()
         f3.close()
-        print("Wrote backup of " + filename + " to " + str(Path(defaultpath) / filenameBackup))
+        print("Wrote backup of settings.txt to " + str(Path(defaultpath) / filenameBackup))
     else:
-        print("Skipping backup of " + filename)
+        print("Skipping backup of settings.txt")
     
     print("Clearing mod(s)...")
 
-    f_settings_old = open(path1 / filename, 'r')
-    dictDLCLoadJSON = json.load(f_settings_old)
+    tempFilename1 = "settings.txt.part1.TEMP"
+    tempFilename2 = "settings.txt.part2.TEMP"
+
+    # skipLines = False
+    part1Done = False
+    part2Write = False
+    announcePart1Done = False
+
+    f_settings_old = open(filepath1, 'r')
+    f_settings_temp1 = open(Path(defaultpath) / tempFilename1, 'x')
+    f_settings_temp2 = open(Path(defaultpath) / tempFilename2, 'x')
+    for line in f_settings_old:
+        if not part1Done:
+                f_settings_temp1.write(line)
+        if "hints=" in line:
+            announcePart1Done = True
+        if "counter_color_mode=" in line:
+            part2Write = True
+        if part1Done and part2Write:
+            f_settings_temp2.write(line)
+        if announcePart1Done:
+            part1Done = True
+
     f_settings_old.close()
-    os.remove(path1 / filename)
+    f_settings_temp1.close()
+    f_settings_temp2.close()
 
-    dictDLCLoadJSON.pop("enabled_mods")
+    f_settings_temp1 = open(Path(defaultpath) / tempFilename1, 'r')
+    f_settings_temp2 = open(Path(defaultpath) / tempFilename2, 'r')
+    
+    os.remove(filepath1)
 
-    with open(path1 / filename, 'x') as fp:
-        json.dump(dictDLCLoadJSON, fp)
+    f_settings_new = open(filepath1, "x")
+    for line in f_settings_temp1:
+        f_settings_new.write(line)
+    
+    f_settings_temp1.close()
+
+    for line in f_settings_temp2:
+        f_settings_new.write(line)
+
+    f_settings_temp2.close()
+    os.remove(Path(defaultpath) / tempFilename1)
+    os.remove(Path(defaultpath) / tempFilename2)
+    
+    f_settings_new.close()
 
     print("Done!")
 
@@ -243,12 +377,12 @@ def getFilePath():
     print("Opening file dialog...")
     root = tkinter.Tk()
     root.withdraw()
-    userDefinedPath = Path(filedialog.askopenfilename(title = "Select " + filename + " File"), filetypes = (("JSON files","*.json"),("all files","*.*")))
+    userDefinedPath = Path(filedialog.askopenfilename(title = "Select Text File"), filetypes = (("Text files","*.txt"),("all files","*.*")))
     return str(userDefinedPath)
 
 print("")
 while True:
-    print("Please choose an option:\n[1] Import mod list to HOI4 from file ($CustomFile.json -> " + filename + ")\n[2] Export mod list from HOI4 to file (" + filename + " -> $CustomFile.json)\n[3] Clear mods from " + filename + "\n[q] Abort")
+    print("Please choose an option:\n[1] Import mod list to HOI4 from file ($CustomFile.txt -> settings.txt)\n[2] Export mod list from HOI4 to file (settings.txt -> $CustomFile.txt)\n[3] Clear mods from settings.txt\n[q] Abort script")
     choice2 = input("> ").lower()
     if choice2 == "1":
         importModList()
@@ -264,4 +398,4 @@ while True:
     else:
         print("\n#########\nERROR: No valid input provided")
 
-input("\nPress any key to exit... ")
+input("\nPress any key to exit script... ")
