@@ -1,3 +1,5 @@
+_Due to the fact that Paradox Interactive have added this functionality in the new Hearts of Iron launcher, I am archiving this repository._
+
 ## About this program
 This is a small program to import/export mod lists from your Hearts of Iron IV installation, which is achieved by modifying the launcher's ``dlc_load.json`` file.
 In order for this to work, you need to have all mods you're importing installed.
